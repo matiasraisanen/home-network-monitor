@@ -41,6 +41,7 @@ function buildRow(payload) {
       : null,
     isp: payload.isp ?? null,
     external_ip: payload.interface?.externalIp ?? null,
+    internal_ip: payload.interface?.internalIp ?? null,
     result_url: payload.result?.url ?? null,
     raw_json: JSON.stringify(payload),
   };

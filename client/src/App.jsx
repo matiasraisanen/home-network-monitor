@@ -78,6 +78,18 @@ export default function App() {
               {latest.server_name}
             </span>
           )}
+          {latest.external_ip && (
+            <span>
+              <strong>External IP</strong>
+              {latest.external_ip}
+            </span>
+          )}
+          {latest.internal_ip && (
+            <span>
+              <strong>Internal IP</strong>
+              {latest.internal_ip}
+            </span>
+          )}
         </div>
       )}
 

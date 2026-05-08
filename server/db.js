@@ -25,6 +25,7 @@ db.exec(`
     server_name   TEXT,
     isp           TEXT,
     external_ip   TEXT,
+    internal_ip   TEXT,
     result_url    TEXT,
     raw_json      TEXT    NOT NULL
   );
@@ -38,21 +39,25 @@ if (!cols.has('download_latency_iqm')) {
 if (!cols.has('upload_latency_iqm')) {
   db.exec('ALTER TABLE measurements ADD COLUMN upload_latency_iqm REAL');
 }
+if (!cols.has('internal_ip')) {
+  db.exec('ALTER TABLE measurements ADD COLUMN internal_ip TEXT');
+}
 
 const insertStmt = db.prepare(`
   INSERT INTO measurements
     (ts, ping_ms, jitter_ms, download_mbps, upload_mbps, packet_loss,
      download_latency_iqm, upload_latency_iqm,
-     server_id, server_name, isp, external_ip, result_url, raw_json)
+     server_id, server_name, isp, external_ip, internal_ip, result_url, raw_json)
   VALUES
     (@ts, @ping_ms, @jitter_ms, @download_mbps, @upload_mbps, @packet_loss,
      @download_latency_iqm, @upload_latency_iqm,
-     @server_id, @server_name, @isp, @external_ip, @result_url, @raw_json)
+     @server_id, @server_name, @isp, @external_ip, @internal_ip, @result_url, @raw_json)
 `);
 
 const rangeStmt = db.prepare(`
   SELECT ts, ping_ms, jitter_ms, download_mbps, upload_mbps, packet_loss,
-         download_latency_iqm, upload_latency_iqm
+         download_latency_iqm, upload_latency_iqm,
+         external_ip, internal_ip
   FROM measurements
   WHERE ts >= @from AND ts <= @to
   ORDER BY ts ASC
@@ -61,7 +66,7 @@ const rangeStmt = db.prepare(`
 const latestStmt = db.prepare(`
   SELECT ts, ping_ms, jitter_ms, download_mbps, upload_mbps, packet_loss,
          download_latency_iqm, upload_latency_iqm,
-         server_name, isp, external_ip, result_url
+         server_name, isp, external_ip, internal_ip, result_url
   FROM measurements
   ORDER BY ts DESC
   LIMIT 1

@@ -6,7 +6,7 @@ import LatencyChart from './components/LatencyChart.jsx';
 import PacketLossChart from './components/PacketLossChart.jsx';
 import StatsTable from './components/StatsTable.jsx';
 
-const RECENT_PRESETS = new Set(['10m', '30m', '1h', '6h', '24h']);
+const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
 export default function App() {
   const [range, setRange] = useState({ preset: '1h' });
@@ -37,10 +37,9 @@ export default function App() {
   }, [load]);
 
   useEffect(() => {
-    if (!RECENT_PRESETS.has(range.preset)) return;
-    const id = setInterval(load, 60_000);
+    const id = setInterval(load, REFRESH_INTERVAL_MS);
     return () => clearInterval(id);
-  }, [range.preset, load]);
+  }, [load]);
 
   return (
     <>

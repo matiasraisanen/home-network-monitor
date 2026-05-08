@@ -20,8 +20,17 @@ time range.
 - `systemd` for the recommended scheduling setup
 - `bash`, `sed`, `mkdir` for the install script
 
-Install the speedtest CLI (if not already): see
-<https://www.speedtest.net/apps/cli>.
+Install the speedtest CLI (if not already). On Ubuntu/Debian, use Ookla's
+apt repo (the snap package and Ubuntu's `speedtest-cli` are *not* the same
+tool):
+
+```bash
+sudo apt-get install -y curl gnupg apt-transport-https
+curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
+sudo apt-get install -y speedtest
+```
+
+For other platforms see <https://www.speedtest.net/apps/cli>.
 
 ## Install
 

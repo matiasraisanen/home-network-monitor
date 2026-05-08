@@ -1,0 +1,10 @@
+[Unit]
+Description=Collect one network speedtest sample
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=__WORKDIR__
+ExecStart=__NODE_BIN__ server/collect.js
+Nice=10

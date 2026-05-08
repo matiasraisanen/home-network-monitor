@@ -1,0 +1,17 @@
+{
+  "name": "network-check",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Continuous home network quality monitor: speedtest every 10 min + dashboard",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace client",
+    "start": "node server/index.js",
+    "collect": "node server/collect.js",
+    "dev:server": "node --watch server/index.js",
+    "dev:client": "npm run dev --workspace client"
+  }
+}

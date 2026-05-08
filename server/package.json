@@ -1,0 +1,11 @@
+{
+  "name": "@network-check/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "dependencies": {
+    "better-sqlite3": "^12.9.0",
+    "express": "^4.21.1"
+  }
+}

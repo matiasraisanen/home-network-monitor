@@ -2,7 +2,7 @@
   "name": "network-check",
   "version": "0.1.0",
   "private": true,
-  "description": "Continuous home network quality monitor: speedtest every 10 min + dashboard",
+  "description": "Continuous home network quality monitor: speedtest every 5 min + dashboard",
   "workspaces": [
     "server",
     "client"
@@ -12,6 +12,15 @@
     "start": "node server/index.js",
     "collect": "node server/collect.js",
     "dev:server": "node --watch server/index.js",
-    "dev:client": "npm run dev --workspace client"
+    "dev:client": "npm run dev --workspace client",
+    "svc:start": "systemctl --user start network-check-collect.timer network-check-web.service",
+    "svc:stop": "systemctl --user stop network-check-collect.timer network-check-web.service",
+    "svc:enable": "systemctl --user enable --now network-check-collect.timer network-check-web.service",
+    "svc:disable": "systemctl --user disable --now network-check-collect.timer network-check-web.service",
+    "svc:status": "systemctl --user status network-check-collect.timer network-check-web.service --no-pager",
+    "svc:logs": "journalctl --user -u network-check-collect.service -u network-check-web.service -n 100 --no-pager",
+    "collector:pause": "systemctl --user stop network-check-collect.timer",
+    "collector:resume": "systemctl --user start network-check-collect.timer",
+    "collector:run-now": "systemctl --user start network-check-collect.service"
   }
 }

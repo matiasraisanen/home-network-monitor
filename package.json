@@ -21,6 +21,10 @@
     "svc:logs": "journalctl --user -u network-check-collect.service -u network-check-web.service -n 100 --no-pager",
     "collector:pause": "systemctl --user stop network-check-collect.timer",
     "collector:resume": "systemctl --user start network-check-collect.timer",
-    "collector:run-now": "systemctl --user start network-check-collect.service"
+    "collector:run-now": "systemctl --user start network-check-collect.service",
+    "web:restart": "systemctl --user restart network-check-web.service",
+    "web:stop": "systemctl --user stop network-check-web.service",
+    "web:start": "systemctl --user start network-check-web.service",
+    "web:rebuild": "npm run build && systemctl --user restart network-check-web.service"
   }
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
-import { fetchMeasurements, fetchLatest } from './api.js';
+import { fetchMeasurements, fetchLatest, fetchSources } from './api.js';
 import RangeSelector, { resolveRange } from './components/RangeSelector.jsx';
+import SourceSelector from './components/SourceSelector.jsx';
 import SpeedChart from './components/SpeedChart.jsx';
 import LatencyChart from './components/LatencyChart.jsx';
 import PacketLossChart from './components/PacketLossChart.jsx';
@@ -13,24 +14,28 @@ export default function App() {
   const [measurements, setMeasurements] = useState([]);
   const [latest, setLatest] = useState(null);
   const [error, setError] = useState(null);
+  const [sources, setSources] = useState([]);
+  const [selectedSource, setSelectedSource] = useState(null);
 
   const [resolvedRange, setResolvedRange] = useState(() => resolveRange({ preset: '1h' }));
 
   const load = useCallback(async () => {
     try {
       const r = resolveRange(range);
-      const [data, last] = await Promise.all([
-        fetchMeasurements(r.from, r.to),
-        fetchLatest(),
+      const [data, last, srcs] = await Promise.all([
+        fetchMeasurements(r.from, r.to, selectedSource),
+        fetchLatest(selectedSource),
+        fetchSources(),
       ]);
       setMeasurements(data);
       setLatest(last);
+      setSources(srcs);
       setResolvedRange(r);
       setError(null);
     } catch (err) {
       setError(err.message);
     }
-  }, [range]);
+  }, [range, selectedSource]);
 
   useEffect(() => {
     load();
@@ -92,6 +97,12 @@ export default function App() {
           )}
         </div>
       )}
+
+      <SourceSelector
+        sources={sources}
+        selected={selectedSource}
+        onChange={setSelectedSource}
+      />
 
       <RangeSelector value={range} onChange={setRange} />
 

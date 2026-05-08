@@ -54,32 +54,66 @@ const insertStmt = db.prepare(`
      @server_id, @server_name, @isp, @external_ip, @internal_ip, @result_url, @raw_json)
 `);
 
-const rangeStmt = db.prepare(`
-  SELECT ts, ping_ms, jitter_ms, download_mbps, upload_mbps, packet_loss,
-         download_latency_iqm, upload_latency_iqm,
-         external_ip, internal_ip
+const sourcesStmt = db.prepare(`
+  SELECT external_ip, internal_ip,
+         COUNT(*) AS count,
+         MIN(ts) AS first_seen,
+         MAX(ts) AS last_seen
   FROM measurements
-  WHERE ts >= @from AND ts <= @to
-  ORDER BY ts ASC
+  GROUP BY external_ip, internal_ip
+  ORDER BY last_seen DESC
 `);
 
-const latestStmt = db.prepare(`
-  SELECT ts, ping_ms, jitter_ms, download_mbps, upload_mbps, packet_loss,
-         download_latency_iqm, upload_latency_iqm,
-         server_name, isp, external_ip, internal_ip, result_url
-  FROM measurements
-  ORDER BY ts DESC
-  LIMIT 1
-`);
+function buildSourceWhere(filter, params) {
+  const clauses = [];
+  if (filter.external_ip !== undefined) {
+    clauses.push(
+      `COALESCE(external_ip, '') = COALESCE(@external_ip, '')`
+    );
+    params.external_ip = filter.external_ip;
+  }
+  if (filter.internal_ip !== undefined) {
+    clauses.push(
+      `COALESCE(internal_ip, '') = COALESCE(@internal_ip, '')`
+    );
+    params.internal_ip = filter.internal_ip;
+  }
+  return clauses;
+}
 
 export function insertMeasurement(row) {
   return insertStmt.run(row);
 }
 
-export function getRange(from, to) {
-  return rangeStmt.all({ from, to });
+export function getRange(from, to, filter = {}) {
+  const params = { from, to };
+  const where = ['ts >= @from', 'ts <= @to', ...buildSourceWhere(filter, params)];
+  const sql = `
+    SELECT ts, ping_ms, jitter_ms, download_mbps, upload_mbps, packet_loss,
+           download_latency_iqm, upload_latency_iqm,
+           external_ip, internal_ip
+    FROM measurements
+    WHERE ${where.join(' AND ')}
+    ORDER BY ts ASC
+  `;
+  return db.prepare(sql).all(params);
 }
 
-export function getLatest() {
-  return latestStmt.get();
+export function getLatest(filter = {}) {
+  const params = {};
+  const where = buildSourceWhere(filter, params);
+  const sql = `
+    SELECT ts, ping_ms, jitter_ms, download_mbps, upload_mbps, packet_loss,
+           download_latency_iqm, upload_latency_iqm,
+           server_name, isp, external_ip, internal_ip, result_url
+    FROM measurements
+    ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
+    ORDER BY ts DESC
+    LIMIT 1
+  `;
+  return db.prepare(sql).get(params);
+}
+
+export function getSources() {
+  return sourcesStmt.all();
 }

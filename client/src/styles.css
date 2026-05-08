@@ -33,6 +33,32 @@ h1 {
   align-items: center;
 }
 
+.source-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  color: #cfd3d8;
+}
+
+.source-bar label {
+  color: #8b9098;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.source-bar select {
+  background: #1c1f25;
+  color: #cfd3d8;
+  border: 1px solid #2a2e36;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-family: inherit;
+}
+
 .range-bar button {
   background: #1c1f25;
   color: #cfd3d8;

@@ -6,13 +6,12 @@ function shortIp(ip) {
 
 function sourceKey(s) {
   if (!s) return '__all__';
-  return `${s.external_ip ?? ''}||${s.internal_ip ?? ''}`;
+  return [s.network_label ?? '', s.external_ip ?? '', s.internal_ip ?? ''].join('||');
 }
 
 function labelFor(s) {
-  const ext = shortIp(s.external_ip);
-  const int = shortIp(s.internal_ip);
-  return `${int} → ${ext}  (${s.count})`;
+  const head = s.network_label ?? `${shortIp(s.internal_ip)} → ${shortIp(s.external_ip)}`;
+  return `${head}  (${s.count})`;
 }
 
 export default function SourceSelector({ sources, selected, onChange }) {
@@ -24,7 +23,13 @@ export default function SourceSelector({ sources, selected, onChange }) {
       return;
     }
     const s = sources.find((x) => sourceKey(x) === e.target.value);
-    if (s) onChange({ external_ip: s.external_ip, internal_ip: s.internal_ip });
+    if (s) {
+      onChange({
+        external_ip: s.external_ip,
+        internal_ip: s.internal_ip,
+        network_label: s.network_label,
+      });
+    }
   };
 
   return (

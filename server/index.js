@@ -12,8 +12,9 @@ const app = express();
 
 function readSourceFilter(query) {
   const filter = {};
-  if (typeof query.external_ip === 'string') filter.external_ip = query.external_ip || null;
-  if (typeof query.internal_ip === 'string') filter.internal_ip = query.internal_ip || null;
+  for (const f of ['external_ip', 'internal_ip', 'network_label']) {
+    if (typeof query[f] === 'string') filter[f] = query[f] || null;
+  }
   return filter;
 }
 

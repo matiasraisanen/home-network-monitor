@@ -83,6 +83,12 @@ export default function App() {
               {latest.server_name}
             </span>
           )}
+          {latest.network_label && (
+            <span>
+              <strong>Network</strong>
+              {latest.network_label}
+            </span>
+          )}
           {latest.external_ip && (
             <span>
               <strong>External IP</strong>

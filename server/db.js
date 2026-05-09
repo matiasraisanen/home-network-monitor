@@ -42,41 +42,50 @@ if (!cols.has('upload_latency_iqm')) {
 if (!cols.has('internal_ip')) {
   db.exec('ALTER TABLE measurements ADD COLUMN internal_ip TEXT');
 }
+if (!cols.has('ssid')) {
+  db.exec('ALTER TABLE measurements ADD COLUMN ssid TEXT');
+}
+if (!cols.has('gateway_mac')) {
+  db.exec('ALTER TABLE measurements ADD COLUMN gateway_mac TEXT');
+}
+if (!cols.has('network_label')) {
+  db.exec('ALTER TABLE measurements ADD COLUMN network_label TEXT');
+}
 
 const insertStmt = db.prepare(`
   INSERT INTO measurements
     (ts, ping_ms, jitter_ms, download_mbps, upload_mbps, packet_loss,
      download_latency_iqm, upload_latency_iqm,
-     server_id, server_name, isp, external_ip, internal_ip, result_url, raw_json)
+     server_id, server_name, isp, external_ip, internal_ip,
+     ssid, gateway_mac, network_label,
+     result_url, raw_json)
   VALUES
     (@ts, @ping_ms, @jitter_ms, @download_mbps, @upload_mbps, @packet_loss,
      @download_latency_iqm, @upload_latency_iqm,
-     @server_id, @server_name, @isp, @external_ip, @internal_ip, @result_url, @raw_json)
+     @server_id, @server_name, @isp, @external_ip, @internal_ip,
+     @ssid, @gateway_mac, @network_label,
+     @result_url, @raw_json)
 `);
 
 const sourcesStmt = db.prepare(`
-  SELECT external_ip, internal_ip,
+  SELECT network_label, ssid, gateway_mac, external_ip, internal_ip,
          COUNT(*) AS count,
          MIN(ts) AS first_seen,
          MAX(ts) AS last_seen
   FROM measurements
-  GROUP BY external_ip, internal_ip
+  GROUP BY network_label, ssid, gateway_mac, external_ip, internal_ip
   ORDER BY last_seen DESC
 `);
 
+const SOURCE_FIELDS = ['external_ip', 'internal_ip', 'network_label'];
+
 function buildSourceWhere(filter, params) {
   const clauses = [];
-  if (filter.external_ip !== undefined) {
-    clauses.push(
-      `COALESCE(external_ip, '') = COALESCE(@external_ip, '')`
-    );
-    params.external_ip = filter.external_ip;
-  }
-  if (filter.internal_ip !== undefined) {
-    clauses.push(
-      `COALESCE(internal_ip, '') = COALESCE(@internal_ip, '')`
-    );
-    params.internal_ip = filter.internal_ip;
+  for (const field of SOURCE_FIELDS) {
+    if (filter[field] !== undefined) {
+      clauses.push(`COALESCE(${field}, '') = COALESCE(@${field}, '')`);
+      params[field] = filter[field];
+    }
   }
   return clauses;
 }
@@ -91,7 +100,7 @@ export function getRange(from, to, filter = {}) {
   const sql = `
     SELECT ts, ping_ms, jitter_ms, download_mbps, upload_mbps, packet_loss,
            download_latency_iqm, upload_latency_iqm,
-           external_ip, internal_ip
+           external_ip, internal_ip, network_label, ssid, gateway_mac
     FROM measurements
     WHERE ${where.join(' AND ')}
     ORDER BY ts ASC
@@ -105,7 +114,8 @@ export function getLatest(filter = {}) {
   const sql = `
     SELECT ts, ping_ms, jitter_ms, download_mbps, upload_mbps, packet_loss,
            download_latency_iqm, upload_latency_iqm,
-           server_name, isp, external_ip, internal_ip, result_url
+           server_name, isp, external_ip, internal_ip,
+           ssid, gateway_mac, network_label, result_url
     FROM measurements
     ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
     ORDER BY ts DESC

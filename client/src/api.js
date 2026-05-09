@@ -1,7 +1,8 @@
 function appendSource(params, source) {
   if (!source) return;
-  if (source.external_ip !== undefined) params.set('external_ip', source.external_ip ?? '');
-  if (source.internal_ip !== undefined) params.set('internal_ip', source.internal_ip ?? '');
+  for (const f of ['external_ip', 'internal_ip', 'network_label']) {
+    if (source[f] !== undefined) params.set(f, source[f] ?? '');
+  }
 }
 
 export async function fetchMeasurements(fromIso, toIso, source) {

@@ -1,8 +1,10 @@
-# network-check
+# home-network-monitor
 
 Continuous home internet quality monitor: runs `speedtest` every 5 minutes,
 stores results in SQLite, and shows them on a dashboard with a configurable
 time range.
+
+![Dashboard screenshot](docs/dashboard.png)
 
 ## Stack
 
